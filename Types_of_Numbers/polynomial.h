@@ -42,7 +42,7 @@ public:
 	polynomial friend operator-(polynomial const& poly1, polynomial const& poly2)
 	{
 		polynomial temp = poly2;
-		for (int i = 0; i < temp.get_terms().size(); i++)
+		for (unsigned int i = 0; i < temp.get_terms().size(); i++)
 			temp.terms_[i].set_coefficient(temp.get_terms()[i].get_coefficient() * -1);//must use terms_ instead of get_terms() to change anything at the moment
 		return combine_polynomials(poly1, temp).combine_like_terms().order();
 	}
@@ -50,8 +50,8 @@ public:
 	polynomial friend operator*(polynomial const& poly1, polynomial const& poly2)
 	{
 		polynomial temp;
-		for (int i = 0; i < poly1.get_terms().size(); i++)
-			for (int j = 0; j < poly2.get_terms().size(); j++)
+		for (unsigned int i = 0; i < poly1.get_terms().size(); i++)
+			for (unsigned int j = 0; j < poly2.get_terms().size(); j++)
 				temp.terms_.push_back(poly1.get_terms()[i] * poly2.get_terms()[j]);
 		return temp;
 
@@ -72,7 +72,7 @@ public:
 	polynomial static combine_polynomials(polynomial const& poly1, polynomial const& poly2)
 	{
 		polynomial temp = poly1;
-		for (int i = 0; i < poly2.get_terms().size(); i++)
+		for (unsigned int i = 0; i < poly2.get_terms().size(); i++)
 			temp.terms_.push_back(poly2.get_terms()[i]);
 		return temp;
 	}
