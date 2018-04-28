@@ -7,8 +7,8 @@ class polynomial
 {
 	std::vector<term> terms_;
 public:
-	polynomial() { this->terms_ = {}; }
-	polynomial(std::initializer_list<term> const& trms) { this->terms_ = trms; }
+	polynomial() { this->set_terms({}); }
+	polynomial(std::initializer_list<term> const& trms) { this->set_terms(trms); }
 
 	explicit polynomial(std::string poly)//interpret string
 	{
@@ -26,13 +26,17 @@ public:
 			if (token == "+" || token == "-")
 				positive = token == "+";
 			else
-				terms_.push_back({ positive ? token : '-' + token });
+				this->add_term(positive ? token : '-' + token);//calls the term string constructor to interpret more
 			poly.erase(0, pos + 1);
 		}
 	}
 
 	std::vector<term> get_terms() const { return this->terms_; }
 	void set_terms(std::vector<term> const& trms) { this->terms_ = trms; }
+
+	void set_term(int const& index, term const& trm) { this->terms_[index] = trm; }
+	void add_term(term const& trm) { this->terms_.push_back(trm); }
+	void remove_term(int const& index) { this->terms_.erase(terms_.begin() + index); }
 
 	polynomial friend operator+(polynomial const& poly1, polynomial const& poly2)
 	{
@@ -43,7 +47,7 @@ public:
 	{
 		polynomial temp = poly2;
 		for (unsigned int i = 0; i < temp.get_terms().size(); i++)
-			temp.terms_[i].set_coefficient(temp.get_terms()[i].get_coefficient() * -1);//must use terms_ instead of get_terms() to change anything at the moment
+			temp.set_term(i, { temp.get_terms()[i].get_coefficient() * -1, temp.get_terms()[i].get_variables(), temp.get_terms()[i].get_exponents() });
 		return combine_polynomials(poly1, temp).combine_like_terms().order();
 	}
 
@@ -52,7 +56,7 @@ public:
 		polynomial temp;
 		for (unsigned int i = 0; i < poly1.get_terms().size(); i++)
 			for (unsigned int j = 0; j < poly2.get_terms().size(); j++)
-				temp.terms_.push_back(poly1.get_terms()[i] * poly2.get_terms()[j]);
+				temp.add_term(poly1.get_terms()[i] * poly2.get_terms()[j]);
 		return temp;
 
 		/*for (int i = 0; i < poly1.get_terms().size(); i++)
@@ -73,22 +77,22 @@ public:
 	{
 		polynomial temp = poly1;
 		for (unsigned int i = 0; i < poly2.get_terms().size(); i++)
-			temp.terms_.push_back(poly2.get_terms()[i]);
+			temp.add_term(poly2.get_terms()[i]);
 		return temp;
 	}
 	
 	//adds terms with the same variables_ and exponents_ to each other then removes the higher index item before the lower so the higher index remains the same
 	polynomial combine_like_terms()
 	{
-		if (this->terms_.size() > 1)
-			for (unsigned int i = 0; i < this->terms_.size(); i++)
-				for (unsigned int j = i; j < this->terms_.size(); j++)
-					if (i != j && term::checker.plus_and_minus(this->terms_[i], this->terms_[j]))
+		if (this->get_terms().size() > 1)
+			for (unsigned int i = 0; i < this->get_terms().size(); i++)
+				for (unsigned int j = i; j < this->get_terms().size(); j++)
+					if (i != j && term::checker.plus_and_minus(this->get_terms()[i], this->get_terms()[j]))
 					{
-						this->terms_.push_back(this->terms_[i] + this->terms_[j]);
+						this->add_term(this->get_terms()[i] + this->get_terms()[j]);
 
-						this->terms_.erase(this->terms_.begin() + j);
-						this->terms_.erase(this->terms_.begin() + i);
+						this->remove_term(j);
+						this->remove_term(i);
 					}
 		return *this;
 	}
@@ -96,19 +100,19 @@ public:
 	//sums two term's exponents_ and swaps the term if the first has a lower degree (sum) or has the same degree and less variables_/exponents_
 	polynomial order()
 	{
-		if (this->terms_.size() > 1)
-			for (unsigned int i = 0, exp_sum1 = 0, exp_sum2 = 0; i < this->terms_.size(); i++, exp_sum1 = 0, exp_sum2 = 0)
-				if (i + 1 < this->terms_.size())
+		if (this->get_terms().size() > 1)
+			for (unsigned int i = 0, exp_sum1 = 0, exp_sum2 = 0; i < this->get_terms().size(); i++, exp_sum1 = 0, exp_sum2 = 0)
+				if (i + 1 < this->get_terms().size())
 				{
-					for (unsigned int j = 0; j < this->terms_[i].get_variables().size(); j++)
-						exp_sum1 += this->terms_[i].get_exponents()[j];
-					for (unsigned int j = 0; j < this->terms_[i + 1].get_variables().size(); j++)
-						exp_sum2 += this->terms_[i + 1].get_exponents()[j];
-					if (exp_sum1 < exp_sum2 || exp_sum1 == exp_sum2 && this->terms_[i].get_variables().size() < this->terms_[i + 1].get_variables().size())
+					for (unsigned int j = 0; j < this->get_terms()[i].get_variables().size(); j++)
+						exp_sum1 += this->get_terms()[i].get_exponents()[j];
+					for (unsigned int j = 0; j < this->get_terms()[i + 1].get_variables().size(); j++)
+						exp_sum2 += this->get_terms()[i + 1].get_exponents()[j];
+					if (exp_sum1 < exp_sum2 || exp_sum1 == exp_sum2 && this->get_terms()[i].get_variables().size() < this->get_terms()[i + 1].get_variables().size())
 					{
-						term const temp = this->terms_[i];
-						this->terms_[i] = this->terms_[i + 1];
-						this->terms_[i + 1] = temp;
+						term const temp{ this->get_terms()[i] };
+						this->set_term(i, this->get_terms()[i + 1]);
+						this->set_term(i + 1, temp);
 						if (i > 0)
 							i -= 2;
 					}
@@ -118,7 +122,7 @@ public:
 
 	std::ostream friend& operator<<(std::ostream& os, polynomial const& poly)
 	{
-		if (poly.terms_.size() > 0)
+		if (poly.get_terms().size() > 0)
 		{
 			os << poly.get_terms()[0];
 			for (unsigned int i = 1; i < poly.get_terms().size(); i++)

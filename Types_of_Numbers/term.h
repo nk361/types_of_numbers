@@ -87,6 +87,16 @@ public:
 		this->exponents_ = trm2.get_exponents();
 	}*/
 
+	class check//create this check and the checker in all classes that can't execute without certain conditions
+	{
+	public:
+		bool static plus_and_minus(term const& trm1, term const& trm2)
+		{
+			return trm1.get_variables() == trm2.get_variables() && trm1.get_exponents() == trm2.get_exponents();
+		}
+	};
+	static check checker;//both need to be static to be called without a term object
+
 	int get_coefficient() const { return this->coefficient_; }
 	void set_coefficient(int const& coe) { this->coefficient_ = coe; }
 	std::vector<char> get_variables() const { return variables_; }
@@ -98,16 +108,6 @@ public:
 	void set_exponent(int const& index, int const& exp) { this->exponents_[index] = exp; }
 	void add_variable(char const& var) { this->variables_.push_back(var); }
 	void add_exponenet(int const& exp) { this->exponents_.push_back(exp); }
-
-	class check//create this check and the checker in all classes that can't execute without certain conditions
-	{
-	public:
-		bool static plus_and_minus(term const& trm1, term const& trm2)
-		{
-			return trm1.get_variables() == trm2.get_variables() && trm1.get_exponents() == trm2.get_exponents();
-		}
-	};
-	static check checker;//both need to be static to be called without a term object
 
 	term friend operator+(term const& trm1, term const& trm2)//check rule first in future string interpreter
 	{
