@@ -30,6 +30,12 @@
     <ClInclude Include="utility_functions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fraction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="general_math_functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

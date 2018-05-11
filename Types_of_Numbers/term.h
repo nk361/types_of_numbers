@@ -1,6 +1,8 @@
 #pragma once
 #include "stdafx.h"
 
+#include "fraction.h"
+
 class term
 {
 	int coefficient_ = 0;
@@ -143,6 +145,18 @@ public:
 			}
 		}
 		return temp;
+	}
+
+	term friend operator/(term const& trm1, term const& trm2)
+	{
+		term temp;
+		//need fraction behavior simplify
+		fraction test(5, 3);
+	}
+
+	term friend operator%(term const& trm1, term const& trm2)
+	{
+		term temp;
 	}
 
 	std::ostream friend&  operator<<(std::ostream& os, term const& trm)

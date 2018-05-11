@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #include "term.h"
+#include <iterator>
 
 class polynomial
 {
@@ -40,7 +41,7 @@ public:
 
 	polynomial friend operator+(polynomial const& poly1, polynomial const& poly2)
 	{
-		return combine_polynomials(poly1, poly2).combine_like_terms().order();
+		return combine_polynomials(poly1, poly2);
 	}
 
 	polynomial friend operator-(polynomial const& poly1, polynomial const& poly2)
@@ -48,7 +49,7 @@ public:
 		polynomial temp = poly2;
 		for (unsigned int i = 0; i < temp.get_terms().size(); i++)
 			temp.set_term(i, { temp.get_terms()[i].get_coefficient() * -1, temp.get_terms()[i].get_variables(), temp.get_terms()[i].get_exponents() });
-		return combine_polynomials(poly1, temp).combine_like_terms().order();
+		return combine_polynomials(poly1, temp);
 	}
 
 	polynomial friend operator*(polynomial const& poly1, polynomial const& poly2)
@@ -64,13 +65,18 @@ public:
 		std::cout << i * poly2.get_terms().size() + j << std::endl;//the index of the illusive temp terms*/
 	}
 
-	std::pair<polynomial, polynomial> friend operator/(polynomial const& poly1, polynomial const& poly2)
+	polynomial friend operator/(polynomial const& poly1, polynomial const& poly2)
 	{
-		polynomial temp, remainder;
+		polynomial temp;
 
 		//Will most likely be all long division, unless synthetic division is faster with smaller divisors
 
-		return std::pair<polynomial, polynomial> { temp, remainder };
+		return temp;
+	}
+
+	polynomial friend operator%(polynomial const& poly1, polynomial const& poly2)
+	{
+		
 	}
 
 	polynomial static combine_polynomials(polynomial const& poly1, polynomial const& poly2)

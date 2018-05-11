@@ -3,11 +3,9 @@
 class utility_functions
 {
 public:
+	//adds characters not found from the first list to the second list
 	template <class my_type>
-	std::vector<my_type> static add_item(my_type const& item, std::vector<my_type> list) { list.insert(list.end(), item); return list; }
-
-	template <class my_type>
-	std::vector<my_type> static add_missing(std::vector<my_type> const& list1, std::vector<my_type> const& list2)//adds characters not found from the first list to the second list
+	std::vector<my_type> static add_missing(std::vector<my_type> const& list1, std::vector<my_type> const& list2)
 	{
 		std::vector<my_type> temp = list2;
 		bool missing = true;
