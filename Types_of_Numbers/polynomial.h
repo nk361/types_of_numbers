@@ -2,7 +2,6 @@
 #include "stdafx.h"
 
 #include "term.h"
-#include <iterator>
 
 class polynomial
 {

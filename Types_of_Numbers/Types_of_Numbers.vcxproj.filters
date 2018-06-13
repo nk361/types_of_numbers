@@ -36,12 +36,15 @@
     <ClInclude Include="general_math_functions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Types_of_Numbers.cpp">
+    <ClCompile Include="number_types_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

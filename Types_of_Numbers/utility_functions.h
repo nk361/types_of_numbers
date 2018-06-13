@@ -4,10 +4,10 @@ class utility_functions
 {
 public:
 	//adds characters not found from the first list to the second list
-	template <class my_type>
-	std::vector<my_type> static add_missing(std::vector<my_type> const& list1, std::vector<my_type> const& list2)
+	template <class MyType>
+	std::vector<MyType> static add_missing(std::vector<MyType> const& list1, std::vector<MyType> const& list2)
 	{
-		std::vector<my_type> temp = list2;
+		std::vector<MyType> temp = list2;
 		bool missing = true;
 		for (int i = 0; i < list1.size(); i++, missing = true)
 		{

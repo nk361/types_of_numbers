@@ -23,14 +23,19 @@ public:
 		this->set_variables({});
 		this->set_exponents({});
 	}
-	
-	/*this checks for digits or a negative symbol as the coefficient_,
-	 *then gets the variables_ and checks for many in a row with exponent 1,
-	 *it then looks for a number in parentheses and gets the full number to make the exponent,
-	 *finally sets the values off the temporary term object*/
-	term(std::string trm)
+
+	/**
+	 *\brief A constructor for converting a formatted string into a term
+	 *\param trm a string with a coefficent (optional), variables (optional), and exponents (optional default is 1)
+	 *
+	 *This checks for digits or a negative symbol as the coefficient_.
+	 *Then gets the variables_ and checks for many in a row with exponent 1.
+	 *It then looks for a number in parentheses and gets the full number to make the exponent.
+	 *Finally sets the values off the temporary term object
+	 */
+	term(std::string const& trm)
 	{
-		term new_term;
+		term temp;
 		bool num = false;
 		for (unsigned int i = 0, digits[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }; i < trm.size(); i++, num = false)
 		{
@@ -40,45 +45,45 @@ public:
 			if (!num || num && i + 1 == trm.size())//checks that it's either found a non digit or that it has reached the end with all digits or a '-'
 			{
 				if (!num && i == 1 && trm[0] == '-')//check for just a negative var at start and that num is not true, indicating that there is a variable next
-					new_term.set_coefficient(-1);
+					temp.set_coefficient(-1);
 				else if (i == 0)//check for just a positive var at start
-					new_term.set_coefficient(1);
+					temp.set_coefficient(1);
 				else
-					new_term.set_coefficient(stoi(trm.substr(0, i + 1)));
+					temp.set_coefficient(stoi(trm.substr(0, i + 1)));
 				for (unsigned int j = i; j < trm.size() && !num; j++)//!num is added to block ever adding variables_ or exponenets for only coefficients
 					if (j == i || trm[j - 1] == ')' || trm[j + 1] == '^')//checks if it's the first var, a var after (exp) or a var before ^ incase there's been a stream of only vars
 					{
-						new_term.add_variable(trm[j]);
+						temp.add_variable(trm[j]);
 						if (trm[j + 1] != '^')//checking for variable with no exponent or to the power of 1
 						{
-							new_term.add_exponenet(1);
+							temp.add_exponenet(1);
 							for (unsigned int k = j + 1; k < trm.size() && trm[k + 1] != '^'; k++)//checks for a continuos streak of variables_ with a power of 1
 							{
-								new_term.add_variable(trm[k]);
-								new_term.add_exponenet(1);
+								temp.add_variable(trm[k]);
+								temp.add_exponenet(1);
 							}
 						}
 					}
 					else if (trm[j - 1] == '(')//checks that it is now over a digit at j
-						for (int k = j; k < trm.size(); k++, num = false)
+						for (unsigned int k = j; k < trm.size(); k++, num = false)
 						{
-							for (unsigned int l = 0; l < sizeof digits; l++)//checks again if the spot is a number that it's over
-								if (trm[k] - '0' == digits[l])
+							for (unsigned int l = 0; l < sizeof digits; l++)//checks again if the spot is a number or negative sign that it's over
+								if (trm[k] - '0' == digits[l] || trm[k] == '-')
 									num = true;
 							if (!num)//this adds the exponent of any size by using the first spot a nuber appears and moving the distance to the last spot that a number was found
 							{
-								new_term.add_exponenet(stoi(trm.substr(j, k - j)));
+								temp.add_exponenet(stoi(trm.substr(j, k - j)));
 								break;
 							}
 						}
 				break;
 			}
 		}
-		this->set_coefficient(new_term.get_coefficient());
-		if (new_term.get_variables().size() > 0 && new_term.get_exponents().size() > 0)
+		this->set_coefficient(temp.get_coefficient());
+		if (temp.get_variables().size() > 0 && temp.get_exponents().size() > 0)
 		{
-			this->set_variables(new_term.get_variables());
-			this->set_exponents(new_term.get_exponents());
+			this->set_variables(temp.get_variables());
+			this->set_exponents(temp.get_exponents());
 		}
 	}
 
