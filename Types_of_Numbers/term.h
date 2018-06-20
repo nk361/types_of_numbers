@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-#include "fraction.h"
+#include "Fraction.h"
 
 class term
 {

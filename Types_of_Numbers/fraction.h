@@ -1,6 +1,5 @@
 #pragma once
 #include "stdafx.h"
-#include "functional"
 
 class fraction
 {
@@ -8,141 +7,25 @@ class fraction
 	int denominator_;
 public:
 	fraction() { this->set_numerator(0); this->set_denominator(1); }
-	fraction(int const& num, int const& den, bool const& trig = false)
+	fraction(int const& num) { this->set_numerator(num); this->set_denominator(1); }
+	fraction(int const& num, int const& den/*, bool const& trig = false*/)
 	{
-		this->set_numerator(num);
-		this->set_denominator(den);
-		if (!trig)
-		{
-			fraction temp = this->fix_signs();
-			this->set_numerator(temp.get_numerator());
-			this->set_denominator(temp.get_denominator());
-		}
+			this->set_numerator(num);
+			this->set_denominator(den);
 	}
 	/**
 	 * \brief Sets the mixed fraction values, nested mixed fractions not supported here, call set_normalize instead
 	 */
-	fraction(int mixed, int num, int den, bool const& trig = false, bool const& norm = false)
+	fraction(int mixed, int num, int den, /*bool const& trig = false, */bool const& norm = false)
 	{
-		//this will take the three parameters to set. If trig is true, the signs for them won't change
-		//if the norm param is true, this will attempt to normalize the fraction if the numerator is greater than the denominator
-		//by adding or subtracting what it needs to to the mixed number value
-		//if both trig and norm are false, all that will by changed is the numerators sign to negative if the mixed sign is negative and numerator's is not
-		//the trig bool is meant to decide whether the signs matter for the fraction to figure out other trig fractions for a triangle
-
-		if (mixed < 0 && num > 0)
-			num *= -1;
-		else if (mixed > 0 && num < 0)
-			mixed *= -1;
-
-		if(!trig)
+		if ((num < 0 ? num * -1 : num) > (den < 0 ? den * -1 : den))
 		{
-			if(num > 0 && den < 0 || num < 0 && den < 0)
-			{
-				mixed *= -1;
-				num *= -1;
-				den *= -1;
-			}
+			if(norm)
+				mixed += num / den;
+			num = (num < 0 ? num * -1 : num) % (den < 0 ? den * -1 : den);
 		}
 
-		/*if(norm)
-		{
-			if(fraction{num, den}.get_mixed() != 0)
-			{
-				mixed += fraction{ num, den }.get_mixed();
-				num %= den;
-			}
-		}*/
-
-		this->set_numerator(num);
-		this->set_denominator(den);
-
-		if (den < 0 && mixed > 0 && trig && !norm)
-			this->set_numerator(num % (den * -1) + mixed * (den * -1));//*this = fraction{ this->get_numerator(), this->get_denominator() * -1 } + mixed;//*this += -mixed;
-		else if(den < 0 && mixed > 0 && trig && norm)
-			this->set_numerator(num + (mixed + num % den * -1) * (den * -1));
-		else if (den > 0 && mixed < 0)
-			this->set_numerator(num % den + mixed * den);
-		else
-			*this += mixed;
-
-		/*num = num * (mixed < 0 && num > 0 ? -1 : 1);
-
-
-		std::cout << "           " << num << std::endl;
-		if (trig)
-		{
-			fix_signs(mixed, num, den);
-			//den *= -1;
-			//num *= -1;
-			//mixed *= -1;
-		}*/
-
-		/*if(norm)
-		{
-			mixed += num * (mixed < 0 && num > 0 ? -1 : 1) / den;
-			num %= den;
-		}
-		
-		if(!trig)
-		{
-			
-			if(mixed >= 0 && num > 0 && den < 0 || mixed <= 0 && num < 0 && den < 0)//if the denominator is negative and the numerator is not or if all values are negative
-			{
-				mixed *= -1;
-				num *= -1;
-				den *= -1;
-			}
-		}
-
-		std::cout << "           " << num << std::endl;
-
-		if (norm)
-		{
-			num *= 1 % den;
-			std::cout << "           " << num << std::endl;
-			//den;
-			mixed += num * 1 / den;
-
-			std::cout << "           " << num << std::endl;
-
-			//std::tie(mixed, num, den) = normalize_params(mixed, num, den);
-
-
-			//std::tuple<mixed, num, den> temp = normalize_params(mixed, num, den);
-			//mixed = std::get<0>(temp);
-
-		}
-			
-
-		this->set_numerator(num);
-		this->set_denominator(den);
-
-		std::cout << "           " << this->get_numerator() << std::endl;
-
-		this->set_mixed(mixed);
-
-		std::cout << "           " << this->get_numerator() << std::endl;
-
-		if (!trig)
-			;// this->fix_signs();
-
-		if (norm)
-		{
-
-			//*this = normalize();
-			//this->set_mixed(this->get_mixed() + num * (mixed < 0 && num > 0 ? -1 : 1) / den);
-		 	//this->set_numerator(this->get_numerator() % den);
-		}
-
-		//this->set_numerator(num * (mixed < 0 && num > 0 ? -1 : 1) % den);
-		//this->set_denominator(den);
-		//this->set_mixed(mixed + num * (mixed < 0 && num > 0 ? -1 : 1) / den);
-
-
-		//this->set_numerator(num * (mixed < 0 && num > 0 ? -1 : 1));
-		//this->set_denominator(den);
-		//this->set_mixed(mixed);// + this->get_numerator() / this->get_denominator());*/
+		*this = fraction{ num, den } + mixed;
 	}
 	/**
 	 * \brief This constructor converts a double to a fraction type.
@@ -154,12 +37,15 @@ public:
 	 */
 	fraction(double const& dec)
 	{//TODO I've seen a way to convert decimals to fractions with repeating values, but I think I'd like to make a decimal class with more accuracy to notice repeating values
+		std::string::size_type const dot = std::to_string(dec).find('.');
+
 		size_t i;
 		for (i = std::to_string(dec).size() - 1; i >= 0; i--)
 			if (std::to_string(dec)[i] != '0')
 				break;
-		this->set_numerator(static_cast<int>(dec * pow(10, i - 1)));
-		this->set_denominator(static_cast<int>(1 * pow(10, i - 1)));
+
+		this->set_numerator(static_cast<int>(dec * pow(10, i - 1 - std::to_string(dec).substr(0, dot - 1).size())));
+		this->set_denominator(static_cast<int>(1 * pow(10, i - 1 - std::to_string(dec).substr(0, dot - 1).size())));
 	}
 	/**
 	 * \brief This constructor converts a string into a fraction object
@@ -177,19 +63,25 @@ public:
 		std::string::size_type const open_parenth = frac.find('(');
 		std::string::size_type const slash = frac.find('/');
 		
-		this->set_numerator(stoi(frac.substr(open_parenth == std::string::npos ? 0 : open_parenth + 1, open_parenth == std::string::npos ? slash : slash - open_parenth - 1)));
-		this->set_denominator(stoi(frac.substr(slash + 1, open_parenth == std::string::npos ? frac.size() - slash - 1 : frac.size() - slash - 2)));
-		if (open_parenth != std::string::npos)
-			this->set_mixed(stoi(frac.substr(0, open_parenth)));
+		if (open_parenth == std::string::npos && slash == std::string::npos)
+		{
+			this->set_numerator(stoi(frac));
+			this->set_denominator(1);
+		}
+		else
+		{
+			this->set_numerator(stoi(frac.substr(open_parenth == std::string::npos ? 0 : open_parenth + 1, open_parenth == std::string::npos ? slash : slash - open_parenth - 1)));
+			this->set_denominator(stoi(frac.substr(slash + 1, open_parenth == std::string::npos ? frac.size() - slash - 1 : frac.size() - slash - 2)));
+			if (open_parenth != std::string::npos)
+				this->set_mixed(stoi(frac.substr(0, open_parenth)));
+		}
 	}
 
 	/**
 	 * \brief This function relies on integer division to return the integer mixed number value
 	 */
-	int get_mixed(bool trig = false) const
+	int get_mixed() const
 	{
-		if (trig && this->get_denominator() < 0)
-			return this->get_numerator() / (this->get_denominator() * -1);
 		return this->get_numerator() / this->get_denominator();
 	}
 	/**
@@ -234,39 +126,8 @@ public:
 	int get_denominator() const { return this->denominator_; }
 	void set_denominator(int const& den) { if (den == 0) throw std::exception("Cannot divide by zero in fraction class"); this->denominator_ = den; }
 
-	fraction fix_signs() const
-	{
-		//if the denominator is negative and the numerator is positive, denominator *= -1 and numerator *=-1
-
-		if(this->get_denominator() < 0 && this->get_numerator() > 0 || this->get_numerator() < 0 && this->get_denominator() < 0)
-		{
-			return { this->get_numerator() * -1, this->get_denominator() * -1 };
-			//this->set_numerator(this->get_numerator() * -1);
-			//this->set_denominator(this->get_denominator() * -1);
-		}
-		return *this;
-
-		/*if (this->get_denominator() < 0 && this->get_mixed() >= 0 && this->get_numerator() > 0)
-		{
-			this->set_numerator(this->get_numerator() * -1);
-			this->set_denominator(this->get_denominator() * -1);
-			this->set_mixed(this->get_mixed() * -1);
-		}*/
-	}
-	
-	/*void fix_signs(int &mixed, int &num, int &den)
-	{
-		if(den < 0 && mixed > 0 && num > 0)
-		{
-			num *= -1;
-			den *= -1;
-			mixed *= -1;
-		}
-	}*/
-
 	bool is_positive() const
 	{
-		//std::cout << this->get_mixed() << "      " << this->get_numerator() << "       " << this->get_denominator() << std::endl;
 		return 0 <= this->get_numerator() * this->get_denominator();
 	}
 	/**
@@ -283,33 +144,6 @@ public:
 			return { this->get_numerator() / general_math_functions::gcd(this->get_numerator(), this->get_denominator()), this->get_denominator() / general_math_functions::gcd(this->get_numerator(), this->get_denominator()) };
 		return *this;
 	}
-	
-	/*fraction normalize() const
-	{
-		fraction temp;
-
-		temp.set_numerator(this->get_numerator() % this->get_denominator() + this->get       + this->get_numerator() / this->get_denominator())
-
-		temp.set_mixed(this->get_mixed() + this->get_numerator() * (this->get_mixed() < 0 && this->get_numerator() > 0 ? -1 : 1) / this->get_denominator());
-		temp.set_numerator(this->get_numerator() * (this->get_mixed() < 0 && this->get_numerator() > 0 ? -1 : 1) % this->get_denominator());
-		temp.set_denominator(this->get_denominator());
-		
-		return temp;
-	}*/
-
-	fraction normalize(int const& mixed, int const& num, int const& den) const
-	{
-		return { num * (mixed < 0 && num > 0 ? -1 : 1) % den, den, mixed + num * (mixed < 0 && num > 0 ? -1 : 1) / den };
-		/*this->set_numerator(num * (mixed < 0 && num > 0 ? -1 : 1) % den);
-		this->set_denominator(den);
-		this->set_mixed(mixed + num * (mixed < 0 && num > 0 ? -1 : 1) / den);
-		return *this;*/
-	}
-
-	/*std::tuple<int, int, int> normalize_params(int const& mixed, int const& num, int const& den) const
-	{
-		return { num * (mixed < 0 && num > 0 ? -1 : 1) % den, den, mixed + num * (mixed < 0 && num > 0 ? -1 : 1) / den };
-	}*/
 
 	double to_decimal() const
 	{
@@ -324,6 +158,15 @@ public:
 		return { this->get_denominator(), this->get_numerator() };
 	}
 
+	std::string to_string() const
+	{
+		if (this->get_numerator() % this->get_denominator() == 0)
+			return std::to_string(this->get_mixed());
+		if (this->get_mixed() != 0)
+			return std::to_string(this->get_mixed()) + '(' + std::to_string(this->get_numerator() % this->get_denominator()) + '/' + std::to_string(this->get_denominator()) + ')';
+		return std::to_string(this->get_numerator()) + '/' + std::to_string(this->get_denominator());
+	}
+
 	fraction operator+(fraction const& r_frac) const
 	{
 		if (this->get_denominator() != r_frac.get_denominator())
@@ -333,14 +176,14 @@ public:
 				change1 = general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()) / this->get_denominator();
 			if (r_frac.get_denominator() != general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()))
 				change2 = general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()) / r_frac.get_denominator();
-			return fraction{ this->get_numerator() * change1 + r_frac.get_numerator() * change2, general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()) }.simplify();
+			return fraction{ this->get_numerator() * change1 + r_frac.get_numerator() * change2, general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()) };
 		}
-		return fraction{ this->get_numerator() + r_frac.get_numerator(), this->get_denominator() }.simplify();
+		return fraction{ this->get_numerator() + r_frac.get_numerator(), this->get_denominator() };
 	}
 
 	fraction operator+(int const& r_int) const
 	{
-		return *this + fraction{ r_int, 1 };
+		return *this + fraction{ r_int };
 	}
 
 	void operator+=(fraction const& r_frac)
@@ -355,7 +198,7 @@ public:
 
 	fraction operator++()
 	{
-		*this += fraction{ 1, 1 };
+		*this += 1;
 		return *this;
 	}
 
@@ -375,14 +218,14 @@ public:
 				change1 = general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()) / this->get_denominator();
 			if (r_frac.get_denominator() != general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()))
 				change2 = general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()) / r_frac.get_denominator();
-			return fraction{ this->get_numerator() * change1 - r_frac.get_numerator() * change2, general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()) }.simplify();
+			return fraction{ this->get_numerator() * change1 - r_frac.get_numerator() * change2, general_math_functions::lcm(this->get_denominator(), r_frac.get_denominator()) };
 		}
-		return fraction{ this->get_numerator() - r_frac.get_numerator(), this->get_denominator() }.simplify();
+		return fraction{ this->get_numerator() - r_frac.get_numerator(), this->get_denominator() };
 	}
 
 	fraction operator-(int const& r_int) const
 	{
-		return *this - fraction{ r_int, 1 };
+		return *this - fraction{ r_int };
 	}
 
 	void operator-=(fraction const& r_frac)
@@ -397,7 +240,7 @@ public:
 
 	fraction operator--()
 	{
-		*this -= fraction{ 1, 1 };
+		*this -= 1;
 		return *this;
 	}
 
@@ -410,12 +253,12 @@ public:
 
 	fraction operator*(fraction const& r_frac) const
 	{
-		return fraction{ this->get_numerator() * r_frac.get_numerator(), this->get_denominator() * r_frac.get_denominator() }.simplify();
+		return fraction{ this->get_numerator() * r_frac.get_numerator(), this->get_denominator() * r_frac.get_denominator() };
 	}
 
 	fraction operator*(int const& r_int) const
 	{
-		return *this * fraction{ r_int, 1 };
+		return *this * fraction{ r_int };
 	}
 
 	void operator*=(fraction const& r_frac)
@@ -430,12 +273,12 @@ public:
 
 	fraction operator/(fraction const& r_frac) const
 	{
-		return fraction{ *this * r_frac.get_reciprocal() }.simplify();
+		return fraction{ *this * r_frac.get_reciprocal() };
 	}
 
 	fraction operator/(int const& r_int) const
 	{
-		return *this / fraction{ r_int, 1 };
+		return *this / fraction{ r_int };
 	}
 
 	void operator/=(fraction const& r_frac)
@@ -522,7 +365,7 @@ public:
 
 
 
-	std::ostream& operator<<(std::ostream& os) const
+	/*std::ostream& operator<<(std::ostream& os) const
 	{
 		if (this->get_numerator() % this->get_denominator() == 0)
 			os << this->get_mixed();
@@ -538,10 +381,52 @@ public:
 			}
 		}
 		return os;
+	}*/
+
+	std::ostream& operator<<(std::ostream& os) const
+	{
+		return os << this->get_numerator() << "/" << this->get_denominator();
 	}
 
 	std::ostream friend& operator<<(std::ostream& os, fraction const& r_frac)
 	{
 		return r_frac.operator<<(os);
+	}
+
+	void output_simplified() const
+	{
+		std::cout << this->simplify();
+		if (this->get_numerator() % this->get_denominator() != 0)
+			std::cout << " or " << this->get_mixed() << "(" << this->simplify() - this->get_mixed() << ")";
+		std::cout << std::endl;
+	}
+	
+	void output_pretty_signs() const
+	{
+		if(!this->is_positive())
+			std::cout << "-";
+		if (this->get_mixed() != 0)
+			std::cout << abs(this->get_mixed());
+		std::cout << "(" << abs(this->get_numerator() % this->get_denominator()) << "/" << abs(this->get_denominator()) << ")";
+		std::cout << std::endl;
+	}
+
+	void output_details() const
+	{
+		std::cout << *this;
+		if (this->get_mixed() != 0)
+		{
+			std::cout << " or ";
+			std::cout << this->get_mixed();
+			if (this->get_numerator() % this->get_denominator() != 0)
+				std::cout << "(" << this->get_numerator() % this->get_denominator() << "/" << this->get_denominator() << ")";
+		}
+		std::cout << std::endl;
+		
+		std::cout << "Simplified: ";
+		output_simplified();
+		
+		std::cout << "With corrected signs: ";
+		output_pretty_signs();
 	}
 };
