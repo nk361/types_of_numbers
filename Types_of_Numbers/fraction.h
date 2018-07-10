@@ -8,15 +8,23 @@ class fraction
 public:
 	fraction() { this->set_numerator(0); this->set_denominator(1); }
 	fraction(int const& num) { this->set_numerator(num); this->set_denominator(1); }
-	fraction(int const& num, int const& den/*, bool const& trig = false*/)
+	fraction(int const& num, int const& den)
 	{
 			this->set_numerator(num);
 			this->set_denominator(den);
 	}
 	/**
-	 * \brief Sets the mixed fraction values, nested mixed fractions not supported here, call set_normalize instead
+	 * \brief Creates a mixed fraction.
+	 * \param mixed Leading whole number that's added to the fraction
+	 * \param num Fraction numerator before mixed addition
+	 * \param den Fraction denominator
+	 * \param norm Optional normalization of num/den being mixed, affecting the mixed param
+	 * 
+	 * This constructor checks if the numerator and denominator make a mixed fraction, then decides whether to
+	 * normalize (add their calculated mixed value to the other) and fixes the numerator either way.
+	 * It then sets the values to the result of addition between the mixed number and fraction.
 	 */
-	fraction(int mixed, int num, int den, /*bool const& trig = false, */bool const& norm = false)
+	fraction(int mixed, int num, int const& den, bool const& norm = false)
 	{
 		if ((num < 0 ? num * -1 : num) > (den < 0 ? den * -1 : den))
 		{
@@ -29,23 +37,22 @@ public:
 	}
 	/**
 	 * \brief This constructor converts a double to a fraction type.
-	 * \param dec refrence to constant decimal number
+	 * \param dec Refrence to constant double decimal value
 	 * 
-	 * A loop is used to look for the first number from right to left of the decimal parameter.
-	 * Once found, it sets the numerator and denominator to the decimal over one (dec/1) multiplied by ten to a power relative to their position.
-	 * This moves the numerator to the right of the decimal point and moves the denominator the same amount with it.
+	 * This constructor starts by locating the decimal point's location. Then, it starts a loop that searches for a character that isn't
+	 * a zero from right to left. It uses the position that the first non-zero character is found to calculate
 	 */
 	fraction(double const& dec)
 	{//TODO I've seen a way to convert decimals to fractions with repeating values, but I think I'd like to make a decimal class with more accuracy to notice repeating values
-		std::string::size_type const dot = std::to_string(dec).find('.');
+		std::string::size_type const point = std::to_string(dec).find('.');
 
 		size_t i;
 		for (i = std::to_string(dec).size() - 1; i >= 0; i--)
 			if (std::to_string(dec)[i] != '0')
 				break;
 
-		this->set_numerator(static_cast<int>(dec * pow(10, i - 1 - std::to_string(dec).substr(0, dot - 1).size())));
-		this->set_denominator(static_cast<int>(1 * pow(10, i - 1 - std::to_string(dec).substr(0, dot - 1).size())));
+		this->set_numerator(static_cast<int>(dec * pow(10, i - 1 - std::to_string(dec).substr(0, point - 1).size())));
+		this->set_denominator(static_cast<int>(1 * pow(10, i - 1 - std::to_string(dec).substr(0, point - 1).size())));
 	}
 	/**
 	 * \brief This constructor converts a string into a fraction object

@@ -79,12 +79,7 @@ public:
 				break;
 			}
 		}
-		this->set_coefficient(temp.get_coefficient());
-		if (temp.get_variables().size() > 0 && temp.get_exponents().size() > 0)
-		{
-			this->set_variables(temp.get_variables());
-			this->set_exponents(temp.get_exponents());
-		}
+		*this = temp;
 	}
 
 	/*term(const term &trm2)//copy constructor - not needed
