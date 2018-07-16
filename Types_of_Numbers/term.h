@@ -1,7 +1,9 @@
 #pragma once
 #include "stdafx.h"
 
-#include "Fraction.h"
+#include "Fraction.h"//very rough thought, but I'm thinking a fraction may need to be a frame too just to hold info of any type and display somehow
+//what I mean is like the top and bottom can be normal types or custom types that I make, then I need to make generic operations
+//like check for similarities so I could remove like 5x form the top and bottom
 
 class term
 {
@@ -9,19 +11,48 @@ class term
 	std::vector<char> variables_;
 	std::vector<int> exponents_;
 public:
-	term() { this->set_coefficient(0); this->set_variables({}); this->set_exponents({}); }
-	term(int const& coe, std::vector<char> const& vars, std::vector<int> const& exps)
+	term() = default;// { this->set_coefficient(0); this->set_variables({}); this->set_exponents({}); }//handles example: 0
+
+	explicit term(char const& var, int const& exp = 1)//handles examples: r^6, j
 	{
-		this->set_coefficient(coe);
-		this->set_variables(vars);
-		this->set_exponents(exps);
+		this->set_coefficient(1);
+		this->set_variables({ var });
+		this->set_exponents({ exp });
 	}
 
-	term(int const& coe)//constant(s)
+	explicit term(std::vector<char> const& vars, std::vector<int> const& exps = {})//handles examples: (k^45)(g^17)m^9, asd
+	{
+		if (vars.size() != exps.size() && !exps.empty())
+			throw std::exception("Term no coefficient vector constructor: Variables must match the amount of exponents, you must send one in the propper place if it has no exponent");
+
+		this->set_coefficient(1);
+		this->set_variables(vars);
+		if (exps.empty())
+			for (size_t i = 0; i < vars.size(); i++)
+				this->add_exponenet(1);
+		else
+			this->set_exponents(exps);
+	}
+
+	term(int const& coe, char const& var, int const& exp = 1)//handles examples: 5x, 4y^8
 	{
 		this->set_coefficient(coe);
-		this->set_variables({});
-		this->set_exponents({});
+		this->set_variables({ var });
+		this->set_exponents({ exp });
+	}
+
+	explicit term(int const& coe, std::vector<char> const& vars = {}, std::vector<int> const& exps = {})//handles examples: 10, 17(x^1)y^1, 15(k^17)(q^9)p^54
+	{
+		if (vars.size() != exps.size() && !exps.empty())
+			throw std::exception("Term coefficient vector constructor: Variables must match the amount of exponents, you must send one in the propper place if it has no exponent");
+
+		this->set_coefficient(coe);
+		this->set_variables(vars);
+		if (exps.empty())
+			for (size_t i = 0; i < vars.size(); i++)
+				this->add_exponenet(1);
+		else
+			this->set_exponents(exps);
 	}
 
 	/**
@@ -33,7 +64,7 @@ public:
 	 *It then looks for a number in parentheses and gets the full number to make the exponent.
 	 *Finally sets the values off the temporary term object
 	 */
-	term(std::string const& trm)
+	term(std::string const& trm)//I'm not looking forward to it, but I want to change the string format to something like 5x, 4y^8, 30xysdd, 7(y^4)p^3, 9xpo(f^7)cus
 	{
 		term temp;
 		bool num = false;
@@ -113,12 +144,12 @@ public:
 
 	term friend operator+(term const& trm1, term const& trm2)//check rule first in future string interpreter
 	{
-		return { trm1.get_coefficient() + trm2.get_coefficient(), trm1.get_variables(), trm1.get_exponents() };
+		return term{ trm1.get_coefficient() + trm2.get_coefficient(), trm1.get_variables(), trm1.get_exponents() };
 	}
 
 	term friend operator-(term const& trm1, term const& trm2)
 	{
-		return { trm1.get_coefficient() - trm2.get_coefficient(), trm1.get_variables(), trm1.get_exponents() };
+		return term{ trm1.get_coefficient() - trm2.get_coefficient(), trm1.get_variables(), trm1.get_exponents() };
 	}
 
 	term friend operator*(term const& trm1, term const& trm2)

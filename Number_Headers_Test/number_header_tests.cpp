@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "../Types_of_Numbers/fraction.h"
+#include "../Types_of_Numbers/term.h"
+#include "../Types_of_Numbers/polynomial.h"
 
 TEST(GeneralMathFunctioonTests, LCMTests)
 {
@@ -149,11 +151,101 @@ TEST(FractionHeaderTests, FractionConstructors) {
 }
 
 TEST(FractionHeaderTests, AdditionOperators)//this was just added to be sure the three param constructor's addition wasn't the problem
-{
+{//I could either use one test fixture that all operators use
 	fraction const test = fraction{ -1, -2 } + fraction{ -1 };
 	EXPECT_EQ(test.get_mixed(), 0);
 	EXPECT_EQ(test.get_numerator(), 1);
 	EXPECT_EQ(test.get_denominator(), -2);
+
+	fraction test2;
+	test2 += 5;
+	EXPECT_EQ(test2.get_mixed(), 5);
+	EXPECT_EQ(test2.get_numerator(), 5);
+	EXPECT_EQ(test2.get_denominator(), 1);
+}
+
+TEST(TermHeaderTests, TermConstructors)
+{
+	term const def_constructor;
+	EXPECT_EQ(def_constructor.get_coefficient(), 0);
+	EXPECT_TRUE(def_constructor.get_variables().empty());
+	EXPECT_TRUE(def_constructor.get_exponents().empty());
+
+	term const constant_one_param{ 10 };
+	EXPECT_EQ(constant_one_param.get_coefficient(), 10);
+	EXPECT_TRUE(constant_one_param.get_variables().empty());
+	EXPECT_TRUE(constant_one_param.get_exponents().empty());
+
+	term const one_var{ 't' };
+	EXPECT_EQ(one_var.get_coefficient(), 1);
+	EXPECT_EQ(one_var.get_variables(), std::vector<char>{ 't' });
+	EXPECT_EQ(one_var.get_exponents(), std::vector<int>{ 1 });
+
+	term const one_var_one_exponenet{ 'u', 170 };
+	EXPECT_EQ(one_var_one_exponenet.get_coefficient(), 1);
+	EXPECT_EQ(one_var_one_exponenet.get_variables(), std::vector<char>{ 'u' });
+	EXPECT_EQ(one_var_one_exponenet.get_exponents(), std::vector<int>{ 170 });
+
+	term const many_vars_no_exponenets{ std::vector<char>{'b', 'v', 'z'} };
+	EXPECT_EQ(many_vars_no_exponenets.get_coefficient(), 1);
+	ASSERT_EQ(many_vars_no_exponenets.get_variables().size(), (std::vector<char>{ 'b', 'v', 'z' }).size());
+	for (size_t index = 0; index < many_vars_no_exponenets.get_variables().size(); ++index)
+		EXPECT_EQ(many_vars_no_exponenets.get_variables()[index], (std::vector<char>{ 'b', 'v', 'z' })[index]);
+	ASSERT_EQ(many_vars_no_exponenets.get_exponents().size(), (std::vector<int>{ 1, 1, 1 }).size());
+	for (size_t index = 0; index < many_vars_no_exponenets.get_exponents().size(); ++index)
+		EXPECT_EQ(many_vars_no_exponenets.get_exponents()[index], 1);
+
+	term const many_vars_many_exponenets{ { 'e', 'w', 'a' }, { 60, 700, 4 } };
+	EXPECT_EQ(many_vars_many_exponenets.get_coefficient(), 1);
+	ASSERT_EQ(many_vars_many_exponenets.get_variables().size(), (std::vector<char>{ 'e', 'w', 'a' }).size());
+	for (size_t index = 0; index < many_vars_many_exponenets.get_variables().size(); ++index)
+		EXPECT_EQ(many_vars_many_exponenets.get_variables()[index], (std::vector<char>{ 'e', 'w', 'a' })[index]);
+	ASSERT_EQ(many_vars_many_exponenets.get_exponents().size(), (std::vector<int>{ 60, 700, 4 }).size());
+	for (size_t index = 0; index < many_vars_many_exponenets.get_exponents().size(); ++index)
+		EXPECT_EQ(many_vars_many_exponenets.get_exponents()[index], (std::vector<int>{ 60, 700, 4 })[index]);
+
+	term const coefficient_and_one_var{ 20, 'x' };
+	EXPECT_EQ(coefficient_and_one_var.get_coefficient(), 20);
+	EXPECT_EQ(coefficient_and_one_var.get_variables(), std::vector<char>{ 'x' });
+	EXPECT_EQ(coefficient_and_one_var.get_exponents(), std::vector<int>{ 1 });
+
+	term const coefficient_var_with_exponent{ 19, 'y', 6 };
+	EXPECT_EQ(coefficient_var_with_exponent.get_coefficient(), 19);
+	EXPECT_EQ(coefficient_var_with_exponent.get_variables(), std::vector<char>{ 'y' });
+	EXPECT_EQ(coefficient_var_with_exponent.get_exponents(), std::vector<int>{ 6 });
+
+	term const coefficient_var_no_exponenet{ 18, 'p' };
+	EXPECT_EQ(coefficient_var_no_exponenet.get_coefficient(), 18);
+	EXPECT_EQ(coefficient_var_no_exponenet.get_variables(), std::vector<char>{ 'p' });
+	EXPECT_EQ(coefficient_var_no_exponenet.get_exponents(), std::vector<int>{ 1 });
+
+	term const coefficient_vars_no_exponents{ 15, { 'q', 'u' } };
+	EXPECT_EQ(coefficient_vars_no_exponents.get_coefficient(), 15);
+	ASSERT_EQ(coefficient_vars_no_exponents.get_variables().size(), (std::vector<char>{ 'q', 'u' }).size());
+	for (size_t index = 0; index < coefficient_vars_no_exponents.get_variables().size(); ++index)
+		EXPECT_EQ(coefficient_vars_no_exponents.get_variables()[index], (std::vector<char>{ 'q', 'u' })[index]);
+	ASSERT_EQ(coefficient_vars_no_exponents.get_exponents().size(), (std::vector<char>{ 1, 1 }).size());
+	for (size_t index = 0; index < coefficient_vars_no_exponents.get_exponents().size(); ++index)
+		EXPECT_EQ(coefficient_vars_no_exponents.get_exponents()[index], 1);
+
+	term const coeffiecient_vars_and_exponenets{ 105, { 'p', 't', 'w', 'f', 's' }, { 10, 7, 34, 19, 16 } };
+	EXPECT_EQ(coeffiecient_vars_and_exponenets.get_coefficient(), 105);
+	ASSERT_EQ(coeffiecient_vars_and_exponenets.get_variables().size(), std::vector<char>({ 'p', 't', 'w', 'f', 's' }).size());
+	for (size_t index = 0; index < coeffiecient_vars_and_exponenets.get_variables().size(); ++index)
+		EXPECT_EQ(coeffiecient_vars_and_exponenets.get_variables()[index], (std::vector<char>{ 'p', 't', 'w', 'f', 's' })[index]);
+	ASSERT_EQ(coeffiecient_vars_and_exponenets.get_exponents().size(), (std::vector<int>{ 10, 7, 34, 19, 16 }).size());
+	for (size_t index = 0; index < coeffiecient_vars_and_exponenets.get_exponents().size(); ++index)
+		EXPECT_EQ(coeffiecient_vars_and_exponenets.get_exponents()[index], (std::vector<int>{ 10, 7, 34, 19, 16 })[index]);
+
+	//term const string_constant{ "0" };//Going to approach string constructor with test driven development
+	//EXPECT_EQ(string_constant.get_coefficient(), 0);
+	//EXPECT_TRUE(string_constant.get_variables().empty());
+	//EXPECT_TRUE(string_constant.get_exponents().empty());
+}
+
+TEST(PolynomialHeaderTests, PolynomialConstructors)
+{
+	
 }
 
 //ASSERT breaks out of the program if failed, EXPECT does not

@@ -47,7 +47,7 @@ public:
 	{
 		polynomial temp = poly2;
 		for (unsigned int i = 0; i < temp.get_terms().size(); i++)
-			temp.set_term(i, { temp.get_terms()[i].get_coefficient() * -1, temp.get_terms()[i].get_variables(), temp.get_terms()[i].get_exponents() });
+			temp.set_term(i, term{ temp.get_terms()[i].get_coefficient() * -1, temp.get_terms()[i].get_variables(), temp.get_terms()[i].get_exponents() });
 		return combine_polynomials(poly1, temp);
 	}
 

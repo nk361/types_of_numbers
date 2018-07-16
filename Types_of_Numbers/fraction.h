@@ -7,7 +7,7 @@ class fraction
 	int denominator_;
 public:
 	fraction() { this->set_numerator(0); this->set_denominator(1); }
-	fraction(int const& num) { this->set_numerator(num); this->set_denominator(1); }
+	explicit fraction(int const& num) { this->set_numerator(num); this->set_denominator(1); }
 	fraction(int const& num, int const& den)
 	{
 			this->set_numerator(num);
@@ -42,7 +42,7 @@ public:
 	 * This constructor starts by locating the decimal point's location. Then, it starts a loop that searches for a character that isn't
 	 * a zero from right to left. It uses the position that the first non-zero character is found to calculate
 	 */
-	fraction(double const& dec)
+	explicit fraction(double const& dec)
 	{//TODO I've seen a way to convert decimals to fractions with repeating values, but I think I'd like to make a decimal class with more accuracy to notice repeating values
 		std::string::size_type const point = std::to_string(dec).find('.');
 
@@ -65,7 +65,7 @@ public:
 	 * The denominator is set to the position after the division symbol, but needs to know if it was a mixed number to know whether to include the final character in the string.
 	 * Lastly, because the mixed number value relies on the numerator and denominator values, the mixed number is set if the first parenthese was found.
 	 */
-	fraction(std::string frac)
+	explicit fraction(std::string frac)
 	{
 		std::string::size_type const open_parenth = frac.find('(');
 		std::string::size_type const slash = frac.find('/');
@@ -280,8 +280,8 @@ public:
 
 	fraction operator/(fraction const& r_frac) const
 	{
-		return fraction{ *this * r_frac.get_reciprocal() };
-	}
+		return *this * r_frac.get_reciprocal();//is this deconstructing the fraction type to create a fraction with an initializer list?
+	}//wait, I guess this didn't need to be within fraction{  }
 
 	fraction operator/(int const& r_int) const
 	{
@@ -318,6 +318,15 @@ public:
 		return this->simplify().get_numerator() != r_int || this->simplify().get_denominator() != 1;
 	}
 	
+	//bool operator>(int const& r_int) const
+	//{
+		//this is a fraction being compared to a full int
+		//return this->get_mixed() > r_int || (this->get_mixed() == r_int && (this - this->get_mixed())->get_numerator() > 0);
+		//wait, how do I deal with negatives?
+		//wait until tests are made for test driven development
+	//}
+
+	//make fraction ones first then use them for ints
 	bool operator>(int const& r_int) const
 	{
 		if (this->is_positive() && r_int < 0)
